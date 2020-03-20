@@ -25,15 +25,21 @@
 //
 typedef enum {          // ゲームフェイズ
     eGamePhaseEnd,
-    eGamePhasePlayer,       // プレイヤーフェイズ
-    eGamePhaseDealer,       // ディーラーフェイズ
-    eGamePhaseResult,       // リザルトフェイズ
+    eGamePhasePlayer,           // プレイヤーフェイズ
+    eGamePhaseDealer,           // ディーラーフェイズ
+    eGamePhaseResult,           // リザルトフェイズ
 } eGamePhase;
+#define MAX_BASE_VALUE  (10)    // 最大ベース値
 
 
 //
 // Structs
 //
+typedef struct {        // デッキデータ
+    Card cards[MAX_CARD_NUM * MAX_CARD_TYPE];  // デッキのカード
+    int cardCount;                             // デッキの枚数
+} DeckData;
+
 typedef struct {        // プレイデータ
     Card cards[PLAYER_MAX_CARD_CNT];        // 所持カード
     int cardCount;                          // 所持枚数
@@ -66,11 +72,39 @@ static const PhaseInfo PHASE_INFO[] = {     // フェイズ情報
 };
 static eGamePhase m_gamePhase;              // ゲームフェイズ
 
-static int m_deckCardCount;                             // デッキの枚数
-static Card m_deckCards[MAX_CARD_NUM * MAX_CARD_TYPE];  // デッキのカード
+static DeckData m_deck;                     // デッキデータ
 static PlayData m_playerData;               // プレイヤーデータ
 static PlayData m_dealerData;               // ディーラーデータ
 
+
+// デッキの初期化
+BOOL initDeck(DeckData* const deckDataP, const int maxCardNumber, const int maxCardType)
+{
+    int i;
+    Card* cardP;
+    const int maxCardCount = maxCardNumber * maxCardType;
+
+    if (!deckDataP)
+    {
+        return FALSE;
+    }
+
+    for (i = 0; i < maxCardCount; ++i)
+    {
+        cardP = &deckDataP->cards[i];
+        cardP->type = (i / maxCardNumber) + 1;
+        cardP->number = (i % maxCardNumber) + 1;
+        cardP->baseValue = (MAX_BASE_VALUE < cardP->number) ? MAX_BASE_VALUE : cardP->number;
+    }
+
+    return TRUE;
+}
+
+// デッキからカードを引く
+BOOL drawDeck(DeckData* const deckDataP, Card* const cardP)
+{
+    return getCard(deckDataP->cards, deckDataP->cardCount--, cardP);
+}
 
 // 初期化
 BOOL initialize()
@@ -88,9 +122,9 @@ BOOL initialize()
     srand((unsigned int)time(NULL));
 
     // デッキの初期化
-    m_deckCardCount = MAX_CARD_NUM * MAX_CARD_TYPE;
-    CHK(initDeck(m_deckCards, MAX_CARD_NUM, MAX_CARD_TYPE));
-    CHK(shuffleDeck(m_deckCards, m_deckCardCount));
+    m_deck.cardCount = MAX_CARD_NUM * MAX_CARD_TYPE;
+    CHK(initDeck(&m_deck, MAX_CARD_NUM, MAX_CARD_TYPE));
+    CHK(shuffleCard(m_deck.cards, m_deck.cardCount));
 
     // プレイヤーデータの初期化
     for (i = 0; i < PLAYER_MAX_CARD_CNT; ++i)
@@ -102,8 +136,8 @@ BOOL initialize()
     // 初期枚数カードを引く
     for (i = 0; i < PLAYER_INIT_CARD_CNT; ++i)
     {
-        CHK(getCard(m_deckCards, m_deckCardCount--, &m_playerData.cards[i]));
-        CHK(getCard(m_deckCards, m_deckCardCount--, &m_dealerData.cards[i]));
+        CHK(drawDeck(&m_deck, &m_playerData.cards[i]));
+        CHK(drawDeck(&m_deck, &m_dealerData.cards[i]));
     }
     m_playerData.cardCount = PLAYER_INIT_CARD_CNT;
     m_dealerData.cardCount = PLAYER_INIT_CARD_CNT;
@@ -119,7 +153,7 @@ BOOL initialize()
 }
 
 // プレイデータを表示
-void PrintPlayData()
+void printPlayData()
 {
     int i;
     const PlayData* playDataP;
@@ -155,6 +189,7 @@ static eGamePhase phasePlayer()
     eGamePhase phase = eGamePhasePlayer;
 
     LOG("--- phase player\n");
+    printPlayData();
 
     if ((BLACKJACK_VALUE == m_playerData.totalValue) ||
         (BLACKJACK_VALUE == m_dealerData.totalValue))
@@ -171,7 +206,7 @@ static eGamePhase phasePlayer()
         if (drawSelect == 'y' || drawSelect == 'Y')
         {
             // カードを引く
-            CHK(getCard(m_deckCards, m_deckCardCount--, &m_playerData.cards[m_playerData.cardCount]));
+            CHK(drawDeck(&m_deck, &m_playerData.cards[m_playerData.cardCount]));
             m_playerData.cardCount++;
             CHK(calcTotalValue(m_playerData.cards, m_playerData.cardCount, &m_playerData.totalValue));
 
@@ -201,6 +236,7 @@ static eGamePhase phaseDealer()
     eGamePhase phase = eGamePhaseDealer;
 
     LOG("--- phase dealer\n");
+    printPlayData();
 
     if ((BLACKJACK_VALUE <= m_playerData.totalValue)                    // プレイヤーが21以上
         || (m_playerData.totalValue < m_dealerData.totalValue))         // ディーラーの方が数字が大きい
@@ -212,7 +248,7 @@ static eGamePhase phaseDealer()
             || (m_dealerData.totalValue <= m_playerData.totalValue))    // ディーラーの方が数字が小さい or 引き分け
     {
         // カードを引く
-        CHK(getCard(m_deckCards, m_deckCardCount--, &m_dealerData.cards[m_dealerData.cardCount]));
+        CHK(drawDeck(&m_deck, &m_dealerData.cards[m_dealerData.cardCount]));
         m_dealerData.cardCount++;
         CHK(calcTotalValue(m_dealerData.cards, m_dealerData.cardCount, &m_dealerData.totalValue));
 
@@ -230,7 +266,7 @@ static eGamePhase phaseDealer()
 static eGamePhase phaseResult()
 {
     LOG("--- phase result\n");
-    PrintPlayData();
+    printPlayData();
 
     if (m_playerData.totalValue == m_dealerData.totalValue)
     {
@@ -298,7 +334,6 @@ BOOL updatePhase()
 BOOL update()
 {
     LOG("--- update\n");
-    PrintPlayData();
     return updatePhase();;
 }
 

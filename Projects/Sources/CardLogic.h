@@ -18,8 +18,7 @@ typedef struct {
 //
 // Functions
 //
-BOOL initDeck(Card* const cardsP, const int maxCardNumber, const int maxCardType);
-BOOL shuffleDeck(Card* const cardsP, const int maxCardCount);
+BOOL shuffleCard(Card* const cardsP, const int maxCardCount);
 BOOL getCard(Card* const cardsP, const int maxCardCount, Card* const outputCardP);
 BOOL calcTotalValue(Card* const cardsP, const int maxCardCount, int* const outputValueP);
 
