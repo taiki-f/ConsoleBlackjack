@@ -175,11 +175,8 @@ static eGamePhase phasePlayer()
             m_playerData.cardCount++;
             CHK(calcTotalValue(m_playerData.cards, m_playerData.cardCount, &m_playerData.totalValue));
 
-            if (BLACKJACK_VALUE <= m_playerData.totalValue)
-            {
-                // 21以上ならディーラーフェイズへ
-                phase = eGamePhaseDealer;
-            }
+            // 21以上ならディーラーフェイズへ
+            (BLACKJACK_VALUE <= m_playerData.totalValue) && (phase = eGamePhaseDealer);
         }
         else if (drawSelect == 'n' || drawSelect == 'N')
         {
@@ -217,11 +214,8 @@ static eGamePhase phaseDealer()
         m_dealerData.cardCount++;
         CHK(calcTotalValue(m_dealerData.cards, m_dealerData.cardCount, &m_dealerData.totalValue));
 
-        if (BLACKJACK_VALUE <= m_dealerData.totalValue)
-        {
-            // 21以上ならリザルトフェイズへ
-            phase = eGamePhaseResult;
-        }
+        // 21以上ならリザルトフェイズへ
+        (BLACKJACK_VALUE <= m_dealerData.totalValue) && (phase = eGamePhaseResult);
     }
 
     return phase;

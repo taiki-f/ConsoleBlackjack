@@ -119,10 +119,7 @@ BOOL calcTotalValue(Card* const cardsP, const int maxCardCount, int* const outpu
     for (i = 0; i < maxCardCount; ++i)
     {
         totalValue += cardsP[i].baseValue;
-        if (cardsP[i].number == 1)
-        {
-            aceCount++;
-        }
+        (cardsP[i].number == 1) && aceCount++;
     }
 
     // エース分再計算
