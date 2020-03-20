@@ -29,17 +29,11 @@ typedef enum {          // ゲームフェイズ
     eGamePhaseDealer,           // ディーラーフェイズ
     eGamePhaseResult,           // リザルトフェイズ
 } eGamePhase;
-#define MAX_BASE_VALUE  (10)    // 最大ベース値
 
 
 //
 // Structs
 //
-typedef struct {        // デッキデータ
-    Card cards[MAX_CARD_NUM * MAX_CARD_TYPE];  // デッキのカード
-    int cardCount;                             // デッキの枚数
-} DeckData;
-
 typedef struct {        // プレイデータ
     Card cards[PLAYER_MAX_CARD_CNT];        // 所持カード
     int cardCount;                          // 所持枚数
@@ -76,35 +70,6 @@ static DeckData m_deck;                     // デッキデータ
 static PlayData m_playerData;               // プレイヤーデータ
 static PlayData m_dealerData;               // ディーラーデータ
 
-
-// デッキの初期化
-BOOL initDeck(DeckData* const deckDataP, const int maxCardNumber, const int maxCardType)
-{
-    int i;
-    Card* cardP;
-    const int maxCardCount = maxCardNumber * maxCardType;
-
-    if (!deckDataP)
-    {
-        return FALSE;
-    }
-
-    for (i = 0; i < maxCardCount; ++i)
-    {
-        cardP = &deckDataP->cards[i];
-        cardP->type = (i / maxCardNumber) + 1;
-        cardP->number = (i % maxCardNumber) + 1;
-        cardP->baseValue = (MAX_BASE_VALUE < cardP->number) ? MAX_BASE_VALUE : cardP->number;
-    }
-
-    return TRUE;
-}
-
-// デッキからカードを引く
-BOOL drawDeck(DeckData* const deckDataP, Card* const cardP)
-{
-    return getCard(deckDataP->cards, deckDataP->cardCount--, cardP);
-}
 
 // 初期化
 BOOL initialize()

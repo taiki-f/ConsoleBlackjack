@@ -3,6 +3,41 @@
 #include <stdlib.h>
 
 
+//
+// Defines
+//
+#define MAX_BASE_VALUE  (10)    // 最大ベース値
+
+
+// デッキの初期化
+BOOL initDeck(DeckData* const deckDataP, const int maxCardNumber, const int maxCardType)
+{
+    int i;
+    Card* cardP;
+    const int maxCardCount = maxCardNumber * maxCardType;
+
+    if (!deckDataP)
+    {
+        return FALSE;
+    }
+
+    for (i = 0; i < maxCardCount; ++i)
+    {
+        cardP = &deckDataP->cards[i];
+        cardP->type = (i / maxCardNumber) + 1;
+        cardP->number = (i % maxCardNumber) + 1;
+        cardP->baseValue = (MAX_BASE_VALUE < cardP->number) ? MAX_BASE_VALUE : cardP->number;
+    }
+
+    return TRUE;
+}
+
+// デッキからカードを引く
+BOOL drawDeck(DeckData* const deckDataP, Card* const cardP)
+{
+    return getCard(deckDataP->cards, deckDataP->cardCount--, cardP);
+}
+
 // カードをシャッフル
 BOOL shuffleCard(Card* const cardsP, const int maxCardCount)
 {
