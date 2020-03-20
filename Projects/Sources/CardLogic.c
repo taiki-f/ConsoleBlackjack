@@ -10,7 +10,7 @@
 
 
 // デッキの初期化
-BOOL initDeck(DeckData* const deckDataP, const int maxCardNumber, const int maxCardType)
+BOOL initDeck(DeckData* const deckDataP, int maxCardNumber, int maxCardType)
 {
     int i;
     Card* cardP;
@@ -39,7 +39,7 @@ BOOL drawDeck(DeckData* const deckDataP, Card* const cardP)
 }
 
 // カードをシャッフル
-BOOL shuffleCard(Card* const cardsP, const int maxCardCount)
+BOOL shuffleCard(Card* const cardsP, int maxCardCount)
 {
     int i, cardNum;
     Card card;
@@ -61,7 +61,7 @@ BOOL shuffleCard(Card* const cardsP, const int maxCardCount)
 }
 
 // カードを1枚引く
-BOOL getCard(Card* const cardsP, const int maxCardCount, Card* const outputCardP)
+BOOL getCard(Card* const cardsP, int maxCardCount, Card* const outputCardP)
 {
     Card* cardP;
 
@@ -82,7 +82,7 @@ BOOL getCard(Card* const cardsP, const int maxCardCount, Card* const outputCardP
 }
 
 // エースの分の値を再計算
-static BOOL calcAceValue(int* const valueP, const int aceCount, int* const outputValueP)
+static BOOL calcAceValue(int* const valueP, int aceCount, int* const outputValueP)
 {
     int addValue;
 
@@ -107,7 +107,7 @@ static BOOL calcAceValue(int* const valueP, const int aceCount, int* const outpu
 }
 
 // カードのトータル値を計算
-BOOL calcTotalValue(Card* const cardsP, const int maxCardCount, int* const outputValueP)
+BOOL calcTotalValue(Card* const cardsP, int maxCardCount, int* const outputValueP)
 {
     int i, aceCount = 0, totalValue = 0;
 
